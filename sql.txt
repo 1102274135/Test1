@@ -1,0 +1,92 @@
+1.
+
+SELECT s.STUDENT_NO,s.STUDENT_NAME,sc.COURSE_NO
+FROM hand_student s left JOIN hand_student_core sc on s.STUDENT_NO=sc.STUDENT_NO
+WHERE sc.COURSE_NO not in(
+                          SELECT c.COURSE_NO
+                          FROM hand_course c JOIN hand_teacher t on c.TEACHER_NO=t.TEACHER_NO
+                          WHERE t.TEACHER_NAME='ÚÈÑà'
+      )  or sc.COURSE_NO is null
+
+2.
+
+SELECT s.STUDENT_NO,s.STUDENT_NAME
+FROM hand_student s JOIN hand_student_core sc on s.STUDENT_NO=sc.STUDENT_NO
+GROUP BY sc.STUDENT_NO
+HAVING COUNT(*)<10
+3.
+
+SELECT s1.STUDENT_NO,s1.STUDENT_NAME
+from (SELECT s.STUDENT_NO,sc.CORE,s.STUDENT_NAME
+     FROM hand_student s JOIN hand_student_core sc on s.STUDENT_NO=sc.STUDENT_NO
+     where sc.COURSE_NO='c001' ) s1 
+		 JOIN (SELECT s.STUDENT_NO,sc.CORE,s.STUDENT_NAME
+     FROM hand_student s JOIN hand_student_core sc on s.STUDENT_NO=sc.STUDENT_NO
+     where sc.COURSE_NO='c002' ) s2
+		 on s1.STUDENT_NO=s2.STUDENT_NO
+WHERE s1.CORE> s2.CORE
+
+4.
+
+SELECT sc.COURSE_NO,AVG(sc.CORE) avg,s.pass
+FROM hand_student_core sc join (
+        SELECT s2.COURSE_NO,s1.c/s2.c pass
+        FROM (SELECT sc.COURSE_NO,count(*) c
+        FROM hand_student_core sc
+        WHERE sc.CORE>=60
+        GROUP BY sc.COURSE_NO) s1 RIGHT JOIN
+             (SELECT sc.COURSE_NO,count(*) c
+             FROM hand_student_core sc
+             GROUP BY sc.COURSE_NO
+             ) s2 on s1.COURSE_NO=s2.COURSE_NO) s
+		 on sc.COURSE_NO=s.COURSE_NO
+GROUP BY COURSE_NO
+ORDER BY avg DESC
+
+5.
+
+SELECT s.STUDENT_NO,s.STUDENT_NAME,s.STUDENT_AGE
+FROM hand_student s ,(SELECT MAX(s.STUDENT_AGE) max,MIN(s.STUDENT_AGE) min
+                           FROM hand_student s
+                           WHERE DATE_FORMAT(NOW(),'%Y')-1992>s.STUDENT_AGE) s1
+WHERE  s.STUDENT_AGE=s1.max or s.STUDENT_AGE=s1.min
+ 
+8.
+
+SELECT s.STUDENT_NO,s.STUDENT_NAME,sc.COURSE_NO,s2.max
+FROM hand_student_core sc join
+          (SELECT sc.COURSE_NO,MAX(sc.CORE) max
+          FROM hand_student_core sc
+          where sc.COURSE_NO in(SELECT c.COURSE_NO
+                                FROM hand_course c JOIN hand_teacher t on c.TEACHER_NO=t.TEACHER_NO
+                                WHERE t.TEACHER_NAME='ÚÈÑà')
+          GROUP BY sc.COURSE_NO) s2 on sc.COURSE_NO=s2.COURSE_NO
+					join hand_student s on s.STUDENT_NO=sc.STUDENT_NO
+where sc.CORE=s2.max
+
+9.
+
+SELECT s.STUDENT_NO,s.STUDENT_NAME,AVG(sc.CORE)
+from hand_student_core sc join hand_student s on sc.STUDENT_NO=s.STUDENT_NO
+where sc.CORE<60
+GROUP BY sc.STUDENT_NO
+HAVING count(*)>=2
+
+
+12.
+
+SELECT t.TEACHER_NO,t.TEACHER_NAME,m.MANAGER_NO,m.MANAGER_NAME
+FROM hand_teacher t join hand_manger m on t.MANAGER_NO=m.MANAGER_NO
+WHERE t.TEACHER_NAME='ºúÃ÷ÐÇ'
+
+13.
+
+SELECT s1.STUDENT_NO,s.STUDENT_NAME,sc.COURSE_NO,sc.CORE
+FROM hand_student_core sc join hand_student s on sc.STUDENT_NO=s.STUDENT_NO,(SELECT sc.STUDENT_NO,sc.CORE
+                               FROM hand_course c join hand_student_core sc on c.COURSE_NO=sc.COURSE_NO
+                               WHERE c.COURSE_NAME='J2SE') s1
+WHERE sc.STUDENT_NO=s1.STUDENT_NO 
+		  and sc.CORE>s1.CORE
+															 
+            
+
